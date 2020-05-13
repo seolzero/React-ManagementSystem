@@ -22,37 +22,32 @@ const styles = theme => ({
 
 })
 
-const customers = [
-  {
-    'id':'1',
-    'image':'https://placeimg.com/64/64/1',
-    'name': 'Park Seolyeong',
-    'birthday':'941005',
-    'gender':'female',
-    'job':'developer'
-  },
-  {
-    'id':'2',
-    'image':'https://placeimg.com/64/64/2',
-    'name': 'Lee Sangheon',
-    'birthday':'940131',
-    'gender':'male',
-    'job':'developer'
-  },
-  {
-  'id':'3',
-  'image':'https://placeimg.com/64/64/3',
-  'name': 'Siru',
-  'birthday':'190406',
-  'gender':'male',
-  'job':'CUTE'
-  }
-]
 
 //위에서 정의한 스타일이 적용될 수 있도록 classes생성.
 //**React.Component 
 //paper 가로 스크롤 바 생성 1080보다 작아질 때도 테이블 형태유지
 class App extends React.Component {
+//고객의 데이터는 처음에 비어있다가, 서버에 접속해서 가져올 수 있도록 해야함. 
+//사용자의 요청에 따라 데이터를 받으면 재구성 되는 경우라 state로 customers를 명시.
+//probs:변경될 수 없는 변수를 처리할 때 사용.
+  state = {
+      customers: ""
+    }
+
+  //api서버에 접근해서 데이터를 받아오는 작업
+  //모든 컴포넌트가 mount 완료되었을 때 실행.
+  componentDidMount(){
+    this.callApi() //body를 가져와서 then함수로 res로 이름을 바꿔서 customers변수에 넣겠다.
+      .then(res => this.setState({customers: res}))
+      .catch(err => console.log(err)); //오류발생하면 출력.
+  }
+  //비동기적으로 수행. 접속하고자 하는 api를 불러올 수 있음.
+  callApi = async () => {
+    const response = await fetch('/api/customers');
+    const body = await response.json(); //가져온 데이터를 json형태로 body에 저장.
+    return body;
+  }
+
   render(){
     const { classes } = this.props;
     return (
@@ -70,7 +65,7 @@ class App extends React.Component {
           </TableRow>
         </TableHead>
           <TableBody>      
-          {customers.map(c => { return (
+          {this.state.customers ? this.state.customers.map(c => { return (
               <Customer
                 key={c.id}
                 id={c.id}
@@ -81,7 +76,7 @@ class App extends React.Component {
                 birthday={c.birthday}
               />
             );
-          })}</TableBody>
+          }): ""}</TableBody>
         </Table>
       </Paper>
     );
